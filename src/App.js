@@ -1,7 +1,10 @@
 import React, { Component } from 'react';
 import './App.css';
-import { Container, Grid, Paper, CircularProgress } from '@material-ui/core';
+import { Container, Grid, CircularProgress,
+         Card, CardActionArea, CardContent, Typography,
+         CardActions, Button, CardMedia } from '@material-ui/core';
 import axios from 'axios';
+import TokenService from './services/token-service';
 
 class App extends Component {
 
@@ -19,19 +22,31 @@ class App extends Component {
   }
 
   componentDidMount() {
-    axios.get('https://us.api.blizzard.com/hearthstone/cards?locale=en_US&gameMode=battlegrounds&tier=hero&access_token=ACCESS_TOKEN_HERE')
-      .then(res => res.json())
-      .then(res => this.setState({items: res.cards, isLoading: false}))
-      .catch(error => {
-        console.log(error);
-        
+    TokenService.getAccessToken().then(token => {
+      if (!token) {
         this.setState({
           apiConnection: {
             unavailable: true,
-            error: error.message
+            error: 'Unable to get access token'
           },
           isLoading: false
         });
+      } else {
+        console.log(token);
+        axios.get(`https://us.api.blizzard.com/hearthstone/cards?locale=en_US&gameMode=battlegrounds&tier=hero&access_token=${token}`)
+          .then(res => this.setState({items: res.data.cards, isLoading: false}))
+          .catch(error => {
+            console.log(error);
+            
+            this.setState({
+              apiConnection: {
+                unavailable: true,
+                error: error.message
+              },
+              isLoading: false
+            });
+        });
+      }
     });
   }
 
@@ -46,11 +61,32 @@ class App extends Component {
     } else {
       value = <Grid container spacing={5}>
         {this.state.items.map((i, j) => 
-          <Grid item xs key={j}>
-            <Paper style={{textAlign: 'center'}}>
-              <h3>{i.name}</h3>
-              <img style={{display: 'block', margin: 'auto'}} src={i.battlegrounds.image} />
-            </Paper>
+          <Grid item md={4} lg={3} xs={12} sm={6} key={j}>
+            <Card style={{padding: '10px'}}>
+              <CardActionArea>
+                <CardMedia
+                  component="img"
+                  src={i.battlegrounds.image}
+                  title={i.name}
+                />
+                <CardContent>
+                  <Typography gutterBottom variant="h5" component="h2">
+                    {i.name}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary" component="p">
+                    Some additional information
+                  </Typography>
+                </CardContent>
+              </CardActionArea>
+              <CardActions>
+                <Button size="small" color="primary">
+                  Share
+                </Button>
+                <Button size="small" color="primary">
+                  Learn More
+                </Button>
+              </CardActions>
+            </Card>
           </Grid>)}
       </Grid>
     }
