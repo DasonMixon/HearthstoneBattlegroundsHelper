@@ -32,7 +32,6 @@ class App extends Component {
           isLoading: false
         });
       } else {
-        console.log(token);
         axios.get(`https://us.api.blizzard.com/hearthstone/cards?locale=en_US&gameMode=battlegrounds&tier=hero&access_token=${token}`)
           .then(res => this.setState({items: res.data.cards, isLoading: false}))
           .catch(error => {

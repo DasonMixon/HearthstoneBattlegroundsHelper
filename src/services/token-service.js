@@ -4,8 +4,8 @@ class TokenService {
 
     static async getAccessToken() {
         // check local storage for existing access token
-        let existing_token = window.localStorage.getItem('HS_API_AccessToken');
-
+        let existing_token = JSON.parse(window.localStorage.getItem('HS_API_AccessToken'));
+        
         // If existing token and expire time is at least more than 5 seconds in the future
         if (existing_token && existing_token.tokenExpires > new Date().getTime() - 5000) {
             return existing_token.access_token;
